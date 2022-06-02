@@ -1,0 +1,67 @@
+# JAVIER AGUSTIN ARANIBAR GONZÁLEZ
+# ESTRUTURA DE DADOS AVANÇADA
+
+
+from random import randint
+import sys
+ 
+class Graph():
+ 
+    def __init__(self, vertices):
+        self.V = vertices
+        self.graph = [[0 for column in range(vertices)]
+                      for row in range(vertices)]
+ 
+    def imprimir_solucao(self, dist):
+        print("Distancia do vertice da fonte")
+        for node in range(self.V):
+            print(node, "->", dist[node], end="")
+ 
+  
+    def minDistancia(self, dist, sptSet):
+ 
+  
+        min = sys.maxsize
+ 
+        
+        for v in range(self.V):
+            if dist[v] < min and sptSet[v] == False:
+                min = dist[v]
+                min_index = v
+ 
+        return min_index
+ 
+    def dijkstra(self, src):
+ 
+        dist = [sys.maxsize] * self.V
+        dist[src] = 0
+        sptSet = [False] * self.V
+ 
+        for cout in range(self.V):
+            u = self.minDistancia(dist, sptSet)
+            sptSet[u] = True
+            for v in range(self.V):
+                if self.graph[u][v] > 0 and sptSet[v] == False and dist[v] > dist[u] + self.graph[u][v]:
+                   dist[v] = dist[u] + self.graph[u][v]
+ 
+        self.imprimir_solucao(dist)
+ 
+ 
+g = Graph(9)
+
+matriz_30x30 = []
+
+for linha in range(30):
+    linha = []
+
+    for coluna in range(30):
+        linha.append(randint(1,20))
+           
+    matriz_30x30.append(linha)
+
+for linha_matriz in matriz_30x30:
+    print(linha_matriz)
+
+g.graph = matriz_30x30
+ 
+g.dijkstra(2)
