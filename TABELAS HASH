@@ -1,0 +1,157 @@
+//--------------------------------------------------
+//|    Explicação sobre o que é tabela Hash        |
+//--------------------------------------------------
+
+
+// A tabela Hash é simplesmente um vetor cujas as posições ele aramazena 0 a X keys. Ele é denominado como uma tabela de dispersão e sao utilizadas para implementar caches, vetores associativos e conjuntos.
+
+// Essa tabela minimiza a complexcidade de tempo para as operações dinamicas, como por exemplo a inserção,Busca, Modificação e a remoção
+
+// A tabela Hash possui funções de hashing ou funções de espalhamento, que simplesmente é uma função que transorma cada key em um indice da tabela, e essa responde a pergunta em qual posição eu devo colocar a key nessa tabela. Uma boa função de espalhamento consegue espalhar as keys uniformemente pelo conjunto de indices.
+
+// as principais abordagens de funções hash que são essenciais para a tabela hash são as listas encadeadas(esta presente no programa abaixo) (para evitar colisões entre os dados), e o outro é o Open Addressing (endereçamento aberto).
+
+//------------------------------------------------------
+//|              Legendas do programa                  |
+//------------------------------------------------------
+// no codigo abaixo foi feito tabelas para a indicação de uma tabela de nomes de usuarios, junto com os numeros de telefones, partindo de registro de 1 a 22 com o tamanho da tabela de 0 a 22 (23). Linha: 38
+
+// foi criado um void para iniciar as tabelas do exercicio de hash. Linha: 49 
+
+// foi feito a função de epalhamento que para o programa  recebe o telefone e vai gerar um codigo dentro do vetor para salvar esse elemento usuario. Linha: 55
+
+// depois foi gerado a tabela hash, com a função int para gerar keys. Linha: 57
+
+// em sequencia foi criado a função de ler e retornar um Usuario e o telefone dele. Linha: 63
+
+// foi criado a funçao de inserir  usuario na tabela hash. Linha: 76
+
+// Busca a matricula do usuario. Linha: 85
+
+// função de imprimir os nomes e telefones dos usuarios. Linha: 118
+
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// representa tamanho de tabela de 0 a 22
+#define M 23               
+
+
+typedef struct{
+    int telefone;
+    char nome[50];
+
+}Usuario;
+
+Usuario tabelaHash[M];
+
+void iniciarTabelaEXERCICIO(){ // inicia a tabela com o codigo -1
+    int i;
+    for (i = 0; i < M; i++) // comando de repetição que começa de 0, ate menor que M, com incremento de 1 em 1
+        tabelaHash[i].telefone = -1 ; // cada vez que chega na posição da tabela verifica o telefone e isso for -1, significa que a posição esta vazio
+}
+
+// função de espalhamento (recebe o telefone e vai gerar um codigo dentro do vetor para salvar esse elemento usuario
+
+int gerarTabelaHash(int key){
+    return key % M;
+}
+
+
+// func ler e retornar um usuario e o telefone dele
+Usuario lerUsuario(){
+    Usuario USER;
+    printf("Digite o numero do celular: ");
+    scanf("%d", &USER.telefone);
+    scanf("%*c");
+    printf("digite o nome do Usuario a querer ser registrado: ");
+    fgets(USER.nome, 50, stdin);  // para ler os nomes completos (caracter composto) e tambem nao ultrapassando os 50 caracteres. o primeiro é o local onde se vai salvar o nome do usuario; numero de caracteres maximos, e onde vai ler esse parametro
+    return USER;
+}
+
+
+
+
+void inserir(){                // inserir  usuario na tabela
+    Usuario US = lerUsuario();
+    int indice = gerarTabelaHash(US.telefone);
+    while(tabelaHash[indice].telefone != -1 )
+        indice = gerarTabelaHash(indice + 1); // volta para o começo da tabela
+    tabelaHash[indice] = US; // se for falso, nessa posição nao tem ninguem na tabela
+
+}
+
+Usuario* buscar(int key){ // Buscar a matricula do usuario
+    int indice = gerarTabelaHash(key);        // gerar indice de acesso com a key
+    while(tabelaHash[indice].telefone != -1){  // percorrer algumas posições na tabela
+        if(tabelaHash[indice].telefone == key) // verificar se é igual a chave que o usuario esta procurando
+            return &tabelaHash[indice];  // vai para a chave que a pessoa escolheu
+        else
+            indice =  gerarTabelaHash(indice+1); // volta pro começo da tabela
+
+
+
+    }
+    return NULL;
+}
+void imprimir(){    // função de imprimir os nomes e telefones dos usuarios
+    int i;
+    printf("\n -------------------------------------------------------");
+    for (i = 0; i <M; i++){
+        if (tabelaHash[i].telefone != -1)
+            printf("%d = %d \t %s", i, tabelaHash[i].telefone, tabelaHash[i].nome);
+        else
+            printf("%d =\n",i);
+    }
+    printf("\n -----------------------------------------------------");
+}
+
+
+
+
+
+
+// Criando menu para inserir telefone, nome de usuario; buscar telefone; imprimir historico do programa e sai do programa
+
+
+int main() {                     
+    int op, key;
+    Usuario *U;
+
+    iniciarTabelaEXERCICIO();
+
+    do{
+        printf("\n---------------------------------------------------------\n");
+        printf("1 - Inserir Numero de telefone e o Nome de usuario       |\n2 - Buscar telefone                                      |\n3 - Imprimir historico de telefones ja buscados          |\n0 - Sair do programa                                     |\n " );
+        printf("Digite aqui a instrução a ser feita: ");
+        scanf("%d", &op);
+        printf("---------------------------------------------------------\n");
+        switch(op){
+        case 0:
+            printf("Saindo do programa!!\n");
+            break;
+        case 1:
+            inserir();
+            break;
+        case 2:
+            printf("Digite o telefone a ser buscado: ");
+            scanf("%d", &key);
+            U = buscar(key);
+
+            if(U)
+                printf("\n\tTelefone: %d \tNome: %s\n", U->telefone, U->nome);
+            else
+                printf("\nTelefone nao encontrado!\n");
+            break;
+        case 3:
+            imprimir();
+            break;
+        default:
+            printf("Opcao invalida!!, Digite novamente...\n");
+        }
+
+    }while(op != 0);
+
+    return 0;
+}
