@@ -1,0 +1,140 @@
+# JAVIER AGUSTIN ARANIBAR GONZÁLEZ
+# ESTRUTURA DE DADOS AVANÇADA
+
+
+# O algoritmo A* é simplesmente um algoritmo para busca de caminho, ele é similar aos codigos de Dijkstra
+# e tambem do do algoritmo Breadth First Search (que seria a busca em largura). Esse, com respeito a esses 2
+# ele é mais completo e mais bem-sucedido para achar o caminho mais curto entre os nós e grafos; esse algoritmo
+# possui uma função de heurística para encontrar a solução, para diminuir as opções que o programa tem e achar uma
+# soluçção mais rapida e mais precisa.
+# cada vez que o A estrela entra em um nó ela calcula um valor, (variavel f(n)), para que se transloque para
+# todos os nós vizinhos e então entra em um no nó com o menor valor de f(n). Foi determinado uma formula para
+# determinar esse valor de f(n), que seria; f(n) = g(n) + h(n), sendo que Vx(n) é o valor exato no nó inicial para qualquer nó n, e h(n) é para valor estimado heuristico do nó ate o ultimo.
+
+# O programa é sobre um labirinto, feito com o algoritmo A*, com o objetivo de achar um caminho mais curto, com um tempo menor e mais preciso/ efetivel.
+
+import numpy as np
+
+
+
+class no: # foi criado classe nó que pode criar um objeto para cada nó com informações de nó principal, a posiçao do labirinto e os valores (f,g,h)
+
+    def __init__(self, no_maior=None, posicao=None):
+        self.no_maior = no_maior
+        self.posicao = posicao
+        
+        self.f = 0
+        self.g = 0
+        self.h = 0
+        
+    def __eq__(self, other):  
+        return self.posicao == other.posicao
+
+def return_path(no_atual,lab): # foi criado uma função que retorna o caminho da pesquisa.
+    path = []
+    no_linhas, no_colunas = np.shape(lab)
+    result = [[-1 for i in range(no_colunas)] for j in range(no_linhas)] # labirinto de resultados iniciando com -1 para cada posição dos nós.
+    Atual = no_atual
+    while Atual is not None:
+        path.append(Atual.posicao)
+        Atual = Atual.no_maior
+    path = path[::-1] # foi criado o path para retornar o caminho invertido
+  
+    comeco_val = 0
+
+    for i in range(len(path)): # foi atualizado o caminho do inicio ao fim pelo A* com cada passo incrementado em 1
+        result[path[i][0]][path[i][1]] = comeco_val
+        comeco_val += 1
+    return result
+
+
+def buscar(lab, valor, comeco, fim): # foi criado uma função de busca para criar uma lista de tuplas que retorne do começo ao fim do labirinto de maneira especificada.
+
+
+    comeco_no = no(None, tuple(comeco)) # foi criado o nó inicial e final com as variaveis inicializado para f,g e h
+    comeco_no.g = comeco_no.h = comeco_no.f = 0
+    fim_no = no(None, tuple(fim))
+    fim_no.g = fim_no.h = fim_no.f = 0
+
+    ainda_a_visitar = []  # foi criado a lista ainda a visitar  para adicionar o nó inicial
+
+    ja_visitado = [] # foi criado a lista para as listas ja visitadas no no
+  
+    ainda_a_visitar.append(comeco_no) #adicionar o primeiro nó
+  
+  #foi adicionado condição de parada para evitar os possiveis loops infinitos
+    ext_iteracoes = 0
+    max_iteracoes = (len(lab) // 2) ** 10 # maximas iterações possiveis
+
+
+    move  =  [[-1, 0 ], # movimento de busca pra cima
+              [ 0, -1], # movimento de busca pra esquerda
+              [ 1, 0 ], # movimento de busca pra baixo
+              [ 0, 1 ]] # movimento de busca pra direita
+
+    no_linhas, no_colunas = np.shape(lab) # encontrar no labirinto a quantidade de linhas e colunas, usando a biblioteca np
+    
+    
+    while len(ainda_a_visitar) > 0: # foi criado isso para remover a lista (ainda a visitar) no slecionado e adicionar a outra lista (ja visitado)
+        ext_iteracoes += 1    
+        no_atual = ainda_a_visitar[0]
+        current_index = 0
+        for index, item in enumerate(ainda_a_visitar):
+            if item.f < no_atual.f:
+                no_atual = item
+                current_index = index
+        if ext_iteracoes >  max_iteracoes:
+            print ("nao encontrar caminhos com muitas iteracoes")
+            return return_path(no_atual,lab)
+        ainda_a_visitar.pop(current_index)
+        ja_visitado.append(no_atual)
+        if no_atual == fim_no:
+            return return_path(no_atual,lab)
+
+      
+        no_menor = [] # foi gerado uma lista para os nós menores, para gerar todos os quadrados adjacentes
+
+        for nova_posicao in move: 
+
+            
+            no_posicao = (no_atual.posicao[0] + nova_posicao[0], no_atual.posicao[1] + nova_posicao[1])# definir a posição do no
+            if (no_posicao[0] > (no_linhas - 1) or 
+                no_posicao[0] < 0 or 
+                no_posicao[1] > (no_colunas -1) or 
+                no_posicao[1] < 0):
+                continue
+            if lab[no_posicao[0]][no_posicao[1]] != 0:
+                continue
+
+            
+            novo_no = no(no_atual, no_posicao) # criando um Nó novo
+          
+            no_menor.append(novo_no)
+        for no_Men in no_menor:
+            if len([visited_no_Men for visited_no_Men in ja_visitado if visited_no_Men == no_Men]) > 0:
+                continue
+            no_Men.g = no_atual.g + valor
+            # foi calculado os Valores heuristicos usando a distancia euclediana
+            no_Men.h = (((no_Men.posicao[0] - fim_no.posicao[0]) ** 2) + 
+                       ((no_Men.posicao[1] - fim_no.posicao[1]) ** 2)) 
+
+            no_Men.f = no_Men.g + no_Men.h
+            if len([i for i in ainda_a_visitar if no_Men == i and no_Men.g > i.g]) > 0:
+                continue
+            ainda_a_visitar.append(no_Men) # adicionar o no menor na lista ainda a visitar
+
+
+if __name__ == '__main__': # imprimir o programa do labirinto  com o caminho obtido
+
+    lab =  [[0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0],
+            [0, 1, 0, 1, 0, 0],
+            [0, 1, 0, 0, 1, 0],
+            [0, 0, 0, 0, 1, 0]]
+    
+    comeco = [0, 0]
+    fim = [4,5] 
+    valor = 1 
+
+    path = buscar(lab,valor, comeco, fim)
+    print(path)
